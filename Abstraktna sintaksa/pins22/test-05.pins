@@ -1,0 +1,37 @@
+var x : int;
+var y : char;
+var z : void;
+var w : ^int;
+var q : [3]char;
+var r : identifier;
+var a : ^[3]void;
+var b : [3]^int;
+
+#{
+Should output (locations might vary):
+  AstVarDecl(x) @(1.1-1.3)
+    AstAtomType(INT) @(1.9-1.11)
+  AstVarDecl(y) @(2.1-2.3)
+    AstAtomType(CHAR) @(2.9-2.12)
+  AstVarDecl(z) @(3.1-3.3)
+    AstAtomType(VOID) @(3.9-3.12)
+  AstVarDecl(w) @(4.1-4.3)
+    AstPtrType @(4.9-4.9)
+      AstAtomType(INT) @(4.10-4.12)
+  AstVarDecl(q) @(5.1-5.3)
+    AstArrType @(5.9-5.9)
+      AstAtomType(CHAR) @(5.12-5.15)
+      AstConstExpr(INT,3) @(5.10-5.10)
+  AstVarDecl(r) @(6.1-6.3)
+    AstTypeName(identifier) @(6.9-6.18)
+  AstVarDecl(a) @(7.1-7.3)
+    AstPtrType @(7.9-7.9)
+      AstArrType @(7.10-7.10)
+        AstAtomType(VOID) @(7.13-7.16)
+        AstConstExpr(INT,3) @(7.11-7.11)
+  AstVarDecl(b) @(8.1-8.3)
+    AstArrType @(8.9-8.9)
+      AstPtrType @(8.12-8.12)
+        AstAtomType(INT) @(8.13-8.15)
+      AstConstExpr(INT,3) @(8.10-8.10)
+}#

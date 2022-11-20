@@ -1,0 +1,67 @@
+var x : int;
+var y : char;
+
+fun castAndIncrement(z : char) : int = {
+    (z : int) + 1;
+};
+
+fun a() : void = {
+    x = 0;
+    y = 'a';
+
+    while x < 10 do
+        x = x + 1;
+        y = (castAndIncrement(y) : char);
+    end;
+};
+
+#{
+Should output (locations might vary):
+  AstVarDecl(x) @(1.1-1.3)
+    AstAtomType(INT) @(1.9-1.11)
+  AstVarDecl(y) @(2.1-2.3)
+    AstAtomType(CHAR) @(2.9-2.12)
+  AstFunDecl(castAndIncrement) @(4.1-4.3)
+    {Pars}
+      AstParDecl(z) @(4.22-4.22)
+        AstAtomType(CHAR) @(4.26-4.29)
+    AstAtomType(INT) @(4.34-4.36)
+    AstStmtExpr @(4.40-4.40)
+      {Stmts}
+          AstExprStmt @(5.15-5.15)
+            AstBinExpr(ADD) @(5.15-5.15)
+              AstCastExpr @(5.8-5.8)
+                AstNameExpr(z) @(5.6-5.6)
+                AstAtomType(INT) @(5.10-5.12)
+              AstConstExpr(INT,1) @(5.17-5.17)
+  AstFunDecl(a) @(8.1-8.3)
+    {Pars}
+    AstAtomType(VOID) @(8.11-8.14)
+    AstStmtExpr @(8.18-8.18)
+      {Stmts}
+          AstAssignStmt @(9.5-9.5)
+            AstNameExpr(x) @(9.5-9.5)
+            AstConstExpr(INT,0) @(9.9-9.9)
+          AstAssignStmt @(10.5-10.5)
+            AstNameExpr(y) @(10.5-10.5)
+            AstConstExpr(CHAR,'a') @(10.9-10.11)
+          AstWhileStmt @(12.5-12.9)
+            AstBinExpr(LTH) @(12.13-12.13)
+              AstNameExpr(x) @(12.11-12.11)
+              AstConstExpr(INT,10) @(12.15-12.16)
+            AstExprStmt @(13.9-13.9)
+              AstStmtExpr @(13.9-13.9)
+                {Stmts}
+                    AstAssignStmt @(13.9-13.9)
+                      AstNameExpr(x) @(13.9-13.9)
+                      AstBinExpr(ADD) @(13.15-13.15)
+                        AstNameExpr(x) @(13.13-13.13)
+                        AstConstExpr(INT,1) @(13.17-13.17)
+                    AstAssignStmt @(14.9-14.9)
+                      AstNameExpr(y) @(14.9-14.9)
+                      AstCastExpr @(14.34-14.34)
+                        AstCallExpr(castAndIncrement) @(14.14-14.29)
+                          {Args}
+                            AstNameExpr(y) @(14.31-14.31)
+                        AstAtomType(CHAR) @(14.36-14.39)
+}#

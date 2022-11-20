@@ -1,0 +1,20 @@
+fun a(x : int) : void = none;
+fun b(x : int, y : char) : void = none;
+
+#{
+Should output (locations might vary):
+  AstFunDecl(a) @(1.1-1.3)
+    {Pars}
+      AstParDecl(x) @(1.7-1.7)
+        AstAtomType(INT) @(1.11-1.13)
+    AstAtomType(VOID) @(1.18-1.21)
+    AstConstExpr(VOID,none) @(1.25-1.28)
+  AstFunDecl(b) @(2.1-2.3)
+    {Pars}
+      AstParDecl(x) @(2.7-2.7)
+        AstAtomType(INT) @(2.11-2.13)
+      AstParDecl(y) @(2.14-2.14)
+        AstAtomType(CHAR) @(2.20-2.23)
+    AstAtomType(VOID) @(2.28-2.31)
+    AstConstExpr(VOID,none) @(2.35-2.38)
+}#

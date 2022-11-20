@@ -1,0 +1,86 @@
+prg -> decl prg' .
+prg' -> decl prg' .
+prg' -> .
+
+decl -> typ id = type ; .
+decl -> var id : type ; .
+
+decl -> fun id ( arg ) : type = expr ; .
+arg -> .
+arg -> id : type arg' .
+arg' -> .
+arg' -> , id : type arg' .
+
+type -> void .
+type -> char .
+type -> int .
+type -> id .
+type -> [ expr ] type .
+type -> ^ type .
+type -> ( type ) .
+
+expr -> C D' .
+
+expr' -> const .
+expr' -> id funcall .
+expr -> newdel expr .
+expr' -> { stmt compound } .
+expr' -> ( expr typecast ) .
+
+
+funcall -> .
+funcall -> ( funcallarg ) .
+funcallarg -> .
+funcallarg -> expr funcallarg' .
+funcallarg' -> .
+funcallarg' -> , expr funcallarg' .
+
+newdel -> new .
+newdel -> del .
+
+compound -> .
+compound -> stmt compound .
+
+typecast -> .
+typecast -> : type .
+typecast -> where decl prg' .
+
+
+D' -> or C D' .
+D' -> .
+
+C -> R C' .
+C' -> and R C' | .
+
+R -> A R' .
+R' -> == A R' .
+R' -> != A R' .
+R' -> < A R' .
+R' -> > A R' .
+R' -> <= A R' .
+R' -> >= A R' .
+R' -> .
+
+A -> M A' .
+A' -> + M A' .
+A' -> - M A' .
+A' -> .
+
+M -> Pr M' .
+M' -> * Pr M' .
+M' -> / Pr M' .
+M' -> % Pr M' .
+M' -> .
+
+Pr -> Po | + Po | - Po | ! Po | ^ Po.
+
+Po -> expr' Po' .
+Po' -> [ expr ] Po' | ^ Po' | .
+
+stmt -> expr assigment ; .
+stmt -> if expr then stmt condition elif end ; .
+stmt -> while expr do stmt condition end ; .
+
+assigment -> = expr | .
+condition -> stmt condition | .
+elif -> else stmt condition | .

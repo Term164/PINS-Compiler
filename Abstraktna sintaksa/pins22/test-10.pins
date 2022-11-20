@@ -1,0 +1,80 @@
+var a : int;
+var b : char;
+fun increment(x : int) : int = x + 1;
+
+fun main() : void = {
+    a = 0;
+    b = 'a';
+    c = 1;
+    d = 2;
+
+    if (a < 10) then
+        a = increment(a);
+        b = b + 1;
+    else
+        c = increment(c);
+        d = c + d;
+    end;
+};
+
+#{
+  AstVarDecl(a) @(1.1-1.3)
+    AstAtomType(INT) @(1.9-1.11)
+  AstVarDecl(b) @(2.1-2.3)
+    AstAtomType(CHAR) @(2.9-2.12)
+  AstFunDecl(increment) @(3.1-3.3)
+    {Pars}
+      AstParDecl(x) @(3.15-3.15)
+        AstAtomType(INT) @(3.19-3.21)
+    AstAtomType(INT) @(3.26-3.28)
+    AstBinExpr(ADD) @(3.34-3.34)
+      AstNameExpr(x) @(3.32-3.32)
+      AstConstExpr(INT,1) @(3.36-3.36)
+  AstFunDecl(main) @(5.1-5.3)
+    {Pars}
+    AstAtomType(VOID) @(5.14-5.17)
+    AstStmtExpr @(5.21-5.21)
+      {Stmts}
+          AstAssignStmt @(6.5-6.5)
+            AstNameExpr(a) @(6.5-6.5)
+            AstConstExpr(INT,0) @(6.9-6.9)
+          AstAssignStmt @(7.5-7.5)
+            AstNameExpr(b) @(7.5-7.5)
+            AstConstExpr(CHAR,'a') @(7.8-7.10)
+          AstAssignStmt @(8.5-8.5)
+            AstNameExpr(c) @(8.5-8.5)
+            AstConstExpr(INT,1) @(8.9-8.9)
+          AstAssignStmt @(9.5-9.5)
+            AstNameExpr(d) @(9.5-9.5)
+            AstConstExpr(INT,2) @(9.9-9.9)
+          AstIfStmt @(11.5-11.6)
+            AstBinExpr(LTH) @(11.11-11.11)
+              AstNameExpr(a) @(11.9-11.9)
+              AstConstExpr(INT,10) @(11.13-11.14)
+            AstExprStmt @(12.9-12.9)
+              AstStmtExpr @(12.9-12.9)
+                {Stmts}
+                    AstAssignStmt @(12.9-12.9)
+                      AstNameExpr(a) @(12.9-12.9)
+                      AstCallExpr(increment) @(12.13-12.21)
+                        {Args}
+                          AstNameExpr(a) @(12.23-12.23)
+                    AstAssignStmt @(13.9-13.9)
+                      AstNameExpr(b) @(13.9-13.9)
+                      AstBinExpr(ADD) @(13.15-13.15)
+                        AstNameExpr(b) @(13.13-13.13)
+                        AstConstExpr(INT,1) @(13.17-13.17)
+            AstExprStmt @(12.9-12.9)
+              AstStmtExpr @(12.9-12.9)
+                {Stmts}
+                    AstAssignStmt @(15.9-15.9)
+                      AstNameExpr(c) @(15.9-15.9)
+                      AstCallExpr(increment) @(15.13-15.21)
+                        {Args}
+                          AstNameExpr(c) @(15.23-15.23)
+                    AstAssignStmt @(16.9-16.9)
+                      AstNameExpr(d) @(16.9-16.9)
+                      AstBinExpr(ADD) @(16.15-16.15)
+                        AstNameExpr(c) @(16.13-16.13)
+                        AstNameExpr(d) @(16.17-16.17)
+}#

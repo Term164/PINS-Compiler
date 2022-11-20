@@ -1,0 +1,6 @@
+var a : int;
+var b : char;
+fun increment(x : int) : int = x + 1[1][2]^;
+
+#{
+}#

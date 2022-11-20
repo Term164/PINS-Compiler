@@ -1,0 +1,459 @@
+#{ Variable declaration }#
+var current : char;
+var previouslyRead : char;
+var column : int;
+var line : int;
+var lexem : [100]char;
+var number : int;
+var commentStackCounter : int;
+
+#{ Main lexer loop }#
+fun main() : void = ({
+    declareTokens();
+    commentStackCounter = 0;
+    line = 1;
+    column = 0;
+    number = 0;
+    previouslyRead = (0 : char);
+
+    while next != (^EOF : ^char) do
+        next = lexer();
+        printSymbol(next);
+    end;
+    }where
+    var next : ^char;
+    var int1 : int;
+    var int2 : int;
+);
+
+#{ Reads the characters and returns the pointer to the symbol array }#
+fun lexer() : ^char = ({
+    return = ^(0 : char);
+
+    if previouslyRead != (0 : char) then current = previouslyRead;
+    else current = readNext();
+    end;
+    if current == '#' then
+        current = readComment(current);
+    end;
+    if current >= '0' & current <= '9' then
+        return = constructDigitSymbol(current);
+    else
+        if current >= 'A' & current <= 'Z' | current >= 'a' & current <= 'z' | current == '_' then
+            return = constructWordSymbol(current);
+        else
+            previouslyRead = (0 : char);
+            lexem[0] = (2 : char);
+            lexem[2] = (0 : char);
+            if current == (10 : char) then line = line + 1; column = 0; return = lexer(); end;
+            if current == (13 : char) then return = lexer(); end;
+            if current == (9 : char) then column = column + 8 - column % 8; return = lexer(); end;
+            if current == (32 : char) then return = lexer(); end;
+            if current == '(' then return = (^LB : ^char); lexem[1] = '('; end;
+            if current == ')' then return = (^RB : ^char); lexem[1] = ')'; end;
+            if current == '{' then return = (^LCB: ^char); lexem[1] = '{'; end;
+            if current == '}' then return = (^RCB : ^char); lexem[1] = '}'; end;
+            if current == '[' then return = (^LSB : ^char); lexem[1] = '['; end;
+            if current == ']' then return = (^RSB : ^char); lexem[1] = ']'; end;
+            if current == ',' then return = (^COMMA : ^char); lexem[1] = ','; end;
+            if current == ':' then return = (^COLON : ^char); lexem[1] = ':'; end;
+            if current == ';' then return = (^SEMICOLON : ^char); lexem[1] = ';'; end;
+            if current == '&' then return = (^AND : ^char); lexem[1] = '&'; end;
+            if current == '|' then return = (^OR : ^char); lexem[1] = '|'; end;
+            if current == '*' then return = (^MUL : ^char); lexem[1] = '*'; end;
+            if current == '/' then return = (^DIV : ^char); lexem[1] = '/'; end;
+            if current == '%' then return = (^MOD : ^char); lexem[1] = '%'; end;
+            if current == '^' then return = (^EXP : ^char); lexem[1] = '^'; end;
+            if current == '+' then return = (^PLUS : ^char); lexem[1] = '+'; end;
+            if current == '-' then return = (^MINUS : ^char); lexem[1] = '-'; end;
+            if current == '\'' then return = readCharacterSymbol(current); end;
+            if current == '!' then return = checkSymbol(current); lexem[1] = '!'; end;
+            if current == '<' then return = checkSymbol(current); lexem[1] = '<'; end;
+            if current == '>' then return = checkSymbol(current); lexem[1] = '>'; end;
+            if current == '=' then return = checkSymbol(current); lexem[1] = '='; end;
+
+            if current == '$' | return == ^(0 : char) then
+                return = (^EOF : ^char);
+                lexem[1] = ' ';
+                line = 0;
+                column = 0;
+            end;
+        end;
+    end;
+
+    return;
+    }where
+    var return : ^char;
+    var current : char;
+);
+
+#{ Creates a new digit symbol }#
+fun constructDigitSymbol(current : char) : ^char = ({
+    num = 0;
+    while current >= '0' & current <= '9' do
+        num = num * 10 + ((current: int) - ('0' : int));
+        current = readNext();
+    end;
+
+    lexem[0] = (1 : char); #{ Our way to tell if its a number or word we have to print }#
+    number = num;
+    (^CONST_INT : ^char);
+
+    }where
+    var num : int;
+);
+
+#{ Constructs the next token that is a word }#
+
+fun constructWordSymbol(current : char) : ^char = ({
+        return = (0 : ^char);
+        index = 1;
+        lexem[0] = (2 : char); #{ Our way to tell if its a number or word we have to print }#
+        while current >= 'A' & current <= 'Z' | current >= 'a' & current <= 'z' | current == '_'| current >= '0' & current <= '9' do
+            lexem[index] = current;
+            index = index + 1;
+            current = readNext();
+        end;
+        lexem[index] = (0 : char); #{ String ends with null character }#
+        if compare((^CHAR : ^char)) then return = (^CHAR : ^char); end;
+        if compare((^DO : ^char)) then return = (^DO : ^char); end;
+        if compare((^ELSE : ^char)) then return = (^ELSE : ^char); end;
+        if compare((^END : ^char)) then return = (^END : ^char); end;
+        if compare((^FUN : ^char)) then return = (^FUN : ^char); end;
+        if compare((^IF : ^char)) then return = (^IF : ^char); end;
+        if compare((^INT : ^char)) then return = (^INT : ^char); end;
+        if compare((^THEN : ^char)) then return = (^THEN : ^char); end;
+        if compare((^TYP : ^char)) then return = (^TYP : ^char); end;
+        if compare((^VAR : ^char)) then return = (^VAR : ^char); end;
+        if compare((^VOID : ^char)) then return = (^VOID : ^char); end;
+        if compare((^WHERE : ^char)) then return = (^WHERE : ^char); end;
+        if compare((^WHILE : ^char)) then return = (^WHILE : ^char); end;
+        if compare((^NONE : ^char)) then return = (^CONST_VOID : ^char); end;
+        if compare((^NIL : ^char)) then return = (^CONST_POINT : ^char); end;
+        if return == (0 : ^char) then
+            return = (^ID : ^char);
+        end;
+        return;
+    }where
+    var index : int;
+    var return : ^char;
+);
+
+#{ Reads the next legal character }#
+fun readCharacterSymbol(current : char) : ^char = ({
+    nextChar = readNext();
+    if nextChar == '\\' then
+        lexem[1] = nextChar;
+        lexem[3] = (0 : char);
+        nextChar = readNext();
+        if nextChar == '\\' | nextChar == '\'' then
+            lexem[2] = nextChar;
+        end;
+    else
+        if nextChar >= (32 : char) & nextChar <= (126 : char) then
+            lexem[1] = nextChar;
+        end;
+    end;
+
+    nextChar = readNext();
+    if nextChar == '\'' then
+        previouslyRead = (0 : char);
+        return = (^CONST_CHAR : ^char);
+    end;
+    return;
+    }where
+    var nextChar : char;
+    var return : ^char;
+);
+
+
+fun readComment(current : char) : char = ({
+    if isLegalComment(current) then
+        while commentStackCounter > 0 do
+            current = readNext();
+            if current == '#' | current == '}' then
+                isLegalComment(current);
+                none;
+            else
+                if current == (10 : char) then line = line + 1; end;
+            end;
+        end;
+    end;
+    readNext();
+    }
+);
+
+
+fun isLegalComment(current : char) : int = ({
+    nextChar = readNext();
+    if current == '#' & nextChar == '{' then
+        commentStackCounter = commentStackCounter + 1;
+        return = 1;
+    else
+        if current == '}' & nextChar == '#'then
+            commentStackCounter = commentStackCounter - 1;
+            return = 1;
+        else
+            return = 0;
+        end;
+    end;
+    return;
+    }where
+    var nextChar : char;
+    var return : int;
+);
+
+#{ Check if its a single comparator or double }#
+fun checkSymbol(current : char) : ^char = ({
+    nextChar = readNext();
+    if nextChar == '=' then
+        previouslyRead = (0 : char);
+        lexem[2] = '=';
+        lexem[3] = (0 : char);
+        if current == '!' then return = (^NOTEQUAL : ^char); end;
+        if current == '=' then return = (^EQUAL : ^char); end;
+        if current == '<' then return = (^LESSEQUAL : ^char); end;
+        if current == '>' then return = (^GREATEREQUAL : ^char); end;
+    else
+        if current == '!' then return = (^NOT : ^char); end;
+        if current == '=' then return = (^ASSIGN : ^char); end;
+        if current == '<' then return = (^LESS : ^char); end;
+        if current == '>' then return = (^GREATER : ^char); end;
+    end;
+    return;
+    }where
+    var nextChar : char;
+    var return : ^char;
+);
+
+#{ Check if the current lexem matches the given string }#
+fun compare(keyword : ^char) : int = ({
+    isEqual = 1;
+    index = 0;
+    while ((keyword : int) + index*8 : ^char)^ != (0 : char) do
+        if ((((keyword : int) + index*8 : ^char)^ : int) + 32 : char) != lexem[index+1] then
+            isEqual = 0;
+        end;
+        index = index + 1;
+    end;
+
+    if ((keyword : int) + index*8 : ^char)^ != (0 : char) & lexem[index] == (0 : char) then
+        isEqual = 0;
+    end;
+    isEqual;
+    }where
+    var index : int;
+    var isEqual : int;
+);
+
+#{ Prints the symbol in the correct format }#
+fun printSymbol(symbol : ^char) : void = ({
+    putChar('(');
+    index = 0;
+    c = symbol^;
+    while c != (0 : char) do
+        putChar(c);
+        index = index + 1;
+        c = ((symbol : int) + index*8 : ^char)^;
+    end;
+
+    putChar(',');
+    size = printLexem();
+    putChar(',');
+
+    printInt((line));
+    putChar('.');
+    printInt(column-size);
+    putChar('-');
+    printInt(line);
+    putChar('.');
+    printInt(column-1);
+
+    putChar(')');
+    putChar((10 : char));
+    }where
+    var c : char;
+    var index : int;
+    var size : int;
+);
+
+#{ print the currently saved lexem }#
+fun printLexem() : int = ({
+        index = 0;
+        c = lexem[index];
+        if c == (1 : char) then
+            index = index + 1;
+            printInt(number);
+        else
+            index = index + 1;
+            c = lexem[index];
+            while c != (0 : char) do
+                putChar(c);
+                index = index + 1;
+                c = lexem[index];
+            end;
+        end;
+    index = index-1;
+    index;
+    }where
+    var index : int;
+    var c : char;
+);
+
+#{ Reads the next character in the input }#
+fun readNext() : char = {
+    column = column + 1;
+    previouslyRead = getChar();
+    previouslyRead;
+};
+
+#{
+#  Writes int to stdout.
+}#
+fun printInt(num : int) : void = ({
+    rev = 0;
+    numZeros = 0;
+    #{ Handle signedness }#
+    if num < 0 then
+        num = -num;
+        putChar('-');
+    else
+        if num == 0 then
+            numZeros = 1;
+        end;
+    end;
+
+    #{ Reverse number }#
+    while num do
+        rev = rev * 10;
+        rev = rev + (num % 10);
+        num = num / 10;
+        numZeros = numZeros + 1;
+    end;
+
+    #{ Print reversed }#
+    while rev do
+        c = (rev % 10) + ('0' : int);
+        putChar((c : char));
+        rev = rev / 10;
+        numZeros = numZeros - 1;
+    end;
+
+    #{ Print trailing zeros }#
+    while numZeros do
+        putChar('0');
+        numZeros = numZeros - 1;
+    end;
+
+} where
+    var c : int;
+    var rev : int;
+    var numZeros : int;
+);
+
+#{ TOKEN DECLARATION }#
+typ TOKEN = [13]char;
+var LB : TOKEN;
+var RB : TOKEN;
+var LCB : TOKEN;
+var RCB : TOKEN;
+var LSB : TOKEN;
+var RSB : TOKEN;
+var COMMA : TOKEN;
+var COLON : TOKEN;
+var SEMICOLON : TOKEN;
+var AND : TOKEN;
+var OR : TOKEN;
+var MUL : TOKEN;
+var DIV : TOKEN;
+var MOD : TOKEN;
+var EXP : TOKEN;
+var PLUS : TOKEN;
+var MINUS : TOKEN;
+var CHAR : TOKEN;
+var DEL : TOKEN;
+var DO : TOKEN;
+var ELSE : TOKEN;
+var END : TOKEN;
+var FUN : TOKEN;
+var IF : TOKEN;
+var INT : TOKEN;
+var NEW : TOKEN;
+var THEN : TOKEN;
+var TYP : TOKEN;
+var VAR : TOKEN;
+var VOID : TOKEN;
+var WHERE : TOKEN;
+var WHILE : TOKEN;
+var CONST_VOID : TOKEN;
+var CONST_POINT : TOKEN;
+var CONST_INT : TOKEN;
+var CONST_CHAR : TOKEN;
+var ID : TOKEN;
+var EOF : TOKEN;
+var NOTEQUAL : TOKEN;
+var EQUAL : TOKEN;
+var LESSEQUAL : TOKEN;
+var GREATEREQUAL : TOKEN;
+var NOT : TOKEN;
+var ASSIGN : TOKEN;
+var LESS : TOKEN;
+var GREATER : TOKEN;
+var NONE : TOKEN;
+var NIL : TOKEN;
+fun declareTokens() : void = {
+    LB[0] = 'L';LB[1] = 'B';LB[2] = (0 : char);
+    RB[0] = 'R';RB[1] = 'B';RB[2] = (0 : char);
+    LCB[0] = 'L';LCB[1] = 'C';LCB[2] = 'B';LCB[3] = (0 : char);
+    RCB[0] = 'R';RCB[1] = 'C';RCB[2] = 'B';RCB[3] = (0 : char);
+    LSB[0] = 'L';LSB[1] = 'S';LSB[2] = 'B';LSB[3] = (0 : char);
+    RSB[0] = 'R';RSB[1] = 'S';RSB[2] = 'B';RSB[3] = (0 : char);
+    COMMA[0] = 'C';COMMA[1] = 'O';COMMA[2] = 'M';COMMA[3] = 'M';COMMA[4] = 'A';COMMA[5] = (0 : char);
+    COLON[0] = 'C';COLON[1] = 'O';COLON[2] = 'L';COLON[3] = 'O';COLON[4] = 'N';COLON[5] = (0 : char);
+    SEMICOLON[0] = 'S';SEMICOLON[1] = 'E';SEMICOLON[2] = 'M';SEMICOLON[3] = 'I';SEMICOLON[4] = 'C';SEMICOLON[5] = 'O';SEMICOLON[6] = 'L';SEMICOLON[7] = 'O';SEMICOLON[8] = 'N';SEMICOLON[9] = (0 : char);
+    AND[0] = 'A';AND[1] = 'N';AND[2] = 'D';AND[3] = (0 : char);
+    OR[0] = 'O';OR[1] = 'R';OR[2] = (0 : char);
+    MUL[0] = 'M';MUL[1] = 'U';MUL[2] = 'L';MUL[3] = (0 : char);
+    DIV[0] = 'D';DIV[1] = 'I';DIV[2] = 'V';DIV[3] = (0 : char);
+    MOD[0] = 'M';MOD[1] = 'O';MOD[2] = 'D';MOD[3] = (0 : char);
+    EXP[0] = 'E';EXP[1] = 'X';EXP[2] = 'P';EXP[3] = (0 : char);
+    PLUS[0] = 'P';PLUS[1] = 'L';PLUS[2] = 'U';PLUS[3] = 'S';PLUS[4] = (0 : char);
+    MINUS[0] = 'M';MINUS[1] = 'I';MINUS[2] = 'N';MINUS[3] = 'U';MINUS[4] = 'S';MINUS[5] = (0 : char);
+    CHAR[0] = 'C';CHAR[1] = 'H';CHAR[2] = 'A';CHAR[3] = 'R';CHAR[4] = (0 : char);
+    DEL[0] = 'D';DEL[1] = 'E';DEL[2] = 'L';DEL[3] = (0 : char);
+    DO[0] = 'D';DO[1] = 'O';DO[2] = (0 : char);
+    ELSE[0] = 'E';ELSE[1] = 'L';ELSE[2] = 'S';ELSE[3] = 'E';ELSE[4] = (0 : char);
+    END[0] = 'E';END[1] = 'N';END[2] = 'D';END[3] = (0 : char);
+    FUN[0] = 'F';FUN[1] = 'U';FUN[2] = 'N';FUN[3] = (0 : char);
+    IF[0] = 'I';IF[1] = 'F';IF[2] = (0 : char);
+    INT[0] = 'I';INT[1] = 'N';INT[2] = 'T';INT[3] = (0 : char);
+    NEW[0] = 'N';NEW[1] = 'E';NEW[2] = 'W';NEW[3] = (0 : char);
+    THEN[0] = 'T';THEN[1] = 'H';THEN[2] = 'E';THEN[3] = 'N';THEN[4] = (0 : char);
+    TYP[0] = 'T';TYP[1] = 'Y';TYP[2] = 'P';TYP[3] = (0 : char);
+    VAR[0] = 'V';VAR[1] = 'A';VAR[2] = 'R';VAR[3] = (0 : char);
+    VOID[0] = 'V';VOID[1] = 'O';VOID[2] = 'I';VOID[3] = 'D';VOID[4] = (0 : char);
+    WHERE[0] = 'W';WHERE[1] = 'H';WHERE[2] = 'E';WHERE[3] = 'R';WHERE[4] = 'E';WHERE[5] = (0 : char);
+    WHILE[0] = 'W';WHILE[1] = 'H';WHILE[2] = 'I';WHILE[3] = 'L';WHILE[4] = 'E';WHILE[5] = (0 : char);
+    CONST_VOID[0] = 'C';CONST_VOID[1] = 'O';CONST_VOID[2] = 'N';CONST_VOID[3] = 'S';CONST_VOID[4] = 'T';CONST_VOID[5] = '_';CONST_VOID[6] = 'V';CONST_VOID[7] = 'O';CONST_VOID[8] = 'I';CONST_VOID[9] = 'D';CONST_VOID[10] = (0 : char);
+    CONST_POINT[0] = 'C';CONST_POINT[1] = 'O';CONST_POINT[2] = 'N';CONST_POINT[3] = 'S';CONST_POINT[4] = 'T';CONST_POINT[5] = '_';CONST_POINT[6] = 'P';CONST_POINT[7] = 'O';CONST_POINT[8] = 'I';CONST_POINT[9] = 'N';CONST_POINT[10] = 'T';CONST_POINT[11] = (0 : char);
+    CONST_INT[0] = 'C';CONST_INT[1] = 'O';CONST_INT[2] = 'N';CONST_INT[3] = 'S';CONST_INT[4] = 'T';CONST_INT[5] = '_';CONST_INT[6] = 'I';CONST_INT[7] = 'N';CONST_INT[8] = 'T';CONST_INT[9] = (0 : char);
+    CONST_CHAR[0] = 'C';CONST_CHAR[1] = 'O';CONST_CHAR[2] = 'N';CONST_CHAR[3] = 'S';CONST_CHAR[4] = 'T';CONST_CHAR[5] = '_';CONST_CHAR[6] = 'C';CONST_CHAR[7] = 'H';CONST_CHAR[8] = 'A';CONST_CHAR[9] = 'R';CONST_CHAR[10] = (0 : char);
+    ID[0] = 'I';ID[1] = 'D';ID[2] = (0 : char);
+    EOF[0] = 'E'; EOF[1] = 'O'; EOF[2] = 'F'; EOF[3] = (0 : char);
+    NOTEQUAL[0] = 'N';NOTEQUAL[1] = 'O';NOTEQUAL[2] = 'T';NOTEQUAL[3] = 'E';NOTEQUAL[4] = 'Q';NOTEQUAL[5] = 'U';NOTEQUAL[6] = 'A';NOTEQUAL[7] = 'L';NOTEQUAL[8] = (0 : char);
+    EQUAL[0] = 'E';EQUAL[1] = 'Q';EQUAL[2] = 'U';EQUAL[3] = 'A';EQUAL[4] = 'L';EQUAL[5] = (0 : char);
+    LESSEQUAL[0] = 'L';LESSEQUAL[1] = 'E';LESSEQUAL[2] = 'S';LESSEQUAL[3] = 'S';LESSEQUAL[4] = 'E';LESSEQUAL[5] = 'Q';LESSEQUAL[6] = 'U';LESSEQUAL[7] = 'A';LESSEQUAL[8] = 'L';LESSEQUAL[9] = (0 : char);
+    GREATEREQUAL[0] = 'G';GREATEREQUAL[1] = 'R';GREATEREQUAL[2] = 'E';GREATEREQUAL[3] = 'A';GREATEREQUAL[4] = 'T';GREATEREQUAL[5] = 'E';GREATEREQUAL[6] = 'R';GREATEREQUAL[7] = 'E';GREATEREQUAL[8] = 'Q';GREATEREQUAL[9] = 'U';GREATEREQUAL[10] = 'A';GREATEREQUAL[11] = 'L';GREATEREQUAL[12] = (0 : char);
+    NOT[0] = 'N';NOT[1] = 'O';NOT[2] = 'T';NOT[3] = (0 : char);
+    ASSIGN[0] = 'A';ASSIGN[1] = 'S';ASSIGN[2] = 'S';ASSIGN[3] = 'I';ASSIGN[4] = 'G';ASSIGN[5] = 'N';ASSIGN[6] = (0 : char);
+    LESS[0] = 'L';LESS[1] = 'E';LESS[2] = 'S';LESS[3] = 'S';LESS[4] = (0 : char);
+    GREATER[0] = 'G';GREATER[1] = 'R';GREATER[2] = 'E';GREATER[3] = 'A';GREATER[4] = 'T';GREATER[5] = 'E';GREATER[6] = 'R';GREATER[7] = (0 : char);
+    NONE[0] = 'N';NONE[1] = 'O';NONE[2] = 'N';NONE[3] = 'E';NONE[4] = (0 : char);
+    NIL[0] = 'N';NIL[1] = 'I';NIL[2] = 'L';NIL[3] = (0 : char);
+    none;
+};
+
+#{ Forward declaring }#
+fun putChar(c : char) : void = none;
+fun getChar() : char = (0 : char);
+$

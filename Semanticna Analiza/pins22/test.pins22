@@ -1,0 +1,84 @@
+var x : integer;
+
+fun main() : int = {
+    #{New scope}#
+    (x + 1
+    where
+    typ integer = int;
+    #{New scope}#
+    fun tmp() : integer = {
+        #{New scope}#
+        (x + 1
+        where
+        typ integer = int;
+        #{New scope}#
+        fun tmp() : integer = {
+            #{New scope}#
+            (x + 1
+            where
+            typ integer = int;
+            );
+            #{Old scope}#
+        };
+        #{Old scope}#
+        );
+        #{Old scope}#
+    };
+    #{Old scope}#
+    );
+    #{Old scope}#
+};
+
+typ integer = int;
+
+#{Should output: (locations might vary)
+  AstVarDecl(x) @(1.1-1.3)
+    AstTypeName(integer) @(1.9-1.15)
+      declaredAt: 32.1-32.3
+  AstFunDecl(main) @(3.1-3.3)
+    {Pars}
+    AstAtomType(INT) @(3.14-3.16)
+    AstStmtExpr @(3.20-3.20)
+      {Stmts}
+          AstExprStmt @(6.5-6.9)
+            AstWhereExpr @(6.5-6.9)
+              {Decls}
+                  AstTypDecl(integer) @(7.5-7.7)
+                    AstAtomType(INT) @(7.19-7.21)
+                  AstFunDecl(tmp) @(9.5-9.7)
+                    {Pars}
+                    AstTypeName(integer) @(9.17-9.23)
+                      declaredAt: 7.5-7.7
+                    AstStmtExpr @(9.27-9.27)
+                      {Stmts}
+                          AstExprStmt @(12.9-12.13)
+                            AstWhereExpr @(12.9-12.13)
+                              {Decls}
+                                  AstTypDecl(integer) @(13.9-13.11)
+                                    AstAtomType(INT) @(13.23-13.25)
+                                  AstFunDecl(tmp) @(15.9-15.11)
+                                    {Pars}
+                                    AstTypeName(integer) @(15.21-15.27)
+                                      declaredAt: 13.9-13.11
+                                    AstStmtExpr @(15.31-15.31)
+                                      {Stmts}
+                                          AstExprStmt @(18.13-18.17)
+                                            AstWhereExpr @(18.13-18.17)
+                                              {Decls}
+                                                  AstTypDecl(integer) @(19.13-19.15)
+                                                    AstAtomType(INT) @(19.27-19.29)
+                                              AstBinExpr(ADD) @(17.16-17.16)
+                                                AstNameExpr(x) @(17.14-17.14)
+                                                  declaredAt: 1.1-1.3
+                                                AstConstExpr(INT,1) @(17.18-17.18)
+                              AstBinExpr(ADD) @(11.12-11.12)
+                                AstNameExpr(x) @(11.10-11.10)
+                                  declaredAt: 1.1-1.3
+                                AstConstExpr(INT,1) @(11.14-11.14)
+              AstBinExpr(ADD) @(5.8-5.8)
+                AstNameExpr(x) @(5.6-5.6)
+                  declaredAt: 1.1-1.3
+                AstConstExpr(INT,1) @(5.10-5.10)
+  AstTypDecl(integer) @(32.1-32.3)
+    AstAtomType(INT) @(32.15-32.17)
+}#

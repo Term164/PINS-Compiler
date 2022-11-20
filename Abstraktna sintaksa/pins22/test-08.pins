@@ -1,0 +1,30 @@
+fun a() : void = (
+    x + 1 & z != nil
+    where
+    var x : int;
+    var y : void;
+    var z : ^int;
+);
+
+#{
+Should output (locations might vary):
+  AstFunDecl(a) @(1.1-1.3)
+    {Pars}
+    AstAtomType(VOID) @(1.11-1.14)
+    AstWhereExpr @(3.5-3.9)
+      {Decls}
+          AstVarDecl(x) @(4.5-4.7)
+            AstAtomType(INT) @(4.13-4.15)
+          AstVarDecl(y) @(5.5-5.7)
+            AstAtomType(VOID) @(5.13-5.16)
+          AstVarDecl(z) @(6.5-6.7)
+            AstPtrType @(6.13-6.13)
+              AstAtomType(INT) @(6.14-6.16)
+      AstBinExpr(AND) @(2.11-2.11)
+        AstBinExpr(ADD) @(2.7-2.7)
+          AstNameExpr(x) @(2.5-2.5)
+          AstConstExpr(INT,1) @(2.9-2.9)
+        AstBinExpr(NEQ) @(2.15-2.16)
+          AstNameExpr(z) @(2.13-2.13)
+          AstConstExpr(PTR,nil) @(2.18-2.20)
+}#
